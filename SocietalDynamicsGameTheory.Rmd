@@ -2,7 +2,9 @@
 title: "Game Theory of Societal Dynamics"
 author: "Daniel Lawson"
 date: "2025-11-17"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -362,10 +364,13 @@ visualise_history(res_simple$history)
 
 ```
 
-An example of the spatial model.
+An example of the spatial model will be put here.
 
 ```{r}
 ps<-default_parameters(N)
 curstate<-list(rest=resI,powt=powI,conformt=conformI)
 ps$wardecay=0.15
-``
+## incomplete
+```
+
+
