@@ -63,7 +63,7 @@ default_parameters<-function(N){
        inertia=0.0, # intertia in the decision function
        ## spatial parameters
     #   rho = 0.0, # scaling of political gain from war as a function of distance. Set to 0 to make all defections equally valuable for increasing power
-       wardecay=0.0, # decay rate of war effects with distance. Set to 0 to disable the spatial model
+       spatialdecay=0.0, # decay rate of war effects with distance. Set to 0 to disable the spatial model
        ## per-faction parameters
        res0=rep(1/N,N) # resource level available to faction i. Called R^0_i in the paper
        )
@@ -98,7 +98,7 @@ newpow<-function(rest,powt,conformt,p){
   deltapow[conformt==0]<-p$mu * p$w *
     ( (rest[conformt==0])^p$alphaw +  p$rho *
     ## Spatial model adjustment: power gain from war decreases with distance, scaled by rho
-    ifelse(p$wardecay>0, 
+    ifelse(p$spatialdecay>0, 
            getpwareff(powt,p)[conformt==0], # spatial model if used
            1)  # 1 otherwise
     ) 
@@ -145,7 +145,7 @@ newres<-function(rest,powt,conformt,p){
   ret[conformt==0]<-p$epsilon * p$res0[conformt==0] - p$rpen * 
     ## Choice of resource penalty for defection.
     ## penalty for war decreases with distance (scaled by rpen)
-    ifelse(p$wardecay>0, 
+    ifelse(p$spatialdecay>0, 
            getpwareff(powt,p)[conformt==0], # penalty under spatial model
            1)# penalty under the no-spatial model
   ## Prevent negative resources
@@ -228,7 +228,7 @@ getpwareff<-function(powt,p){
   capital<-which(powt==max(powt))
   if(length(capital)>1) capital<-sample(capital,1)
   tdists<-getdists(capital,length(powt))
-  twdists<-exp(-tdists*p$wardecay)
+  twdists<-exp(-tdists*p$spatialdecay)
   twdists/mean(twdists)
 }
 ```
@@ -364,13 +364,17 @@ visualise_history(res_simple$history)
 
 ```
 
-An example of the spatial model will be put here.
+An example of the spatial model:
 
 ```{r}
 ps<-default_parameters(N)
-curstate<-list(rest=resI,powt=powI,conformt=conformI)
-ps$wardecay=0.15
-## incomplete
+ps$spatialdecay=0.38 # Quite a large decay rate
+## It looks structurally very similar
+## Smaller values (->0) converge to the non-spatial solution
+## Larger values make state maintanance harder and therefore reduce epoch lengths
+## Its also easier to see the "collapse" starting at the middle of the state, far from the capital
+## Setting the initial power distribution up different also reveals this sort of dynamics
+## But generally the system self-organises to ensure the usual collapse/expansion dynamics
+res_spatial<-dosim(curstate,500,ps)
+visualise_history(res_spatial$history)
 ```
-
-
